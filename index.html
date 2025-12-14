@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Affiliate Shoppe — Keranjang & Produk</title>
+  <meta name="description" content="Kumpulan produk affiliate Shopee — simpan favorit, buat keranjang lokal, dan buka halaman produk dengan mudah." />
+  <meta property="og:title" content="Affiliate Shoppe — Keranjang & Produk" />
+  <meta property="og:description" content="Kumpulan produk affiliate Shopee — simpan favorit, buat keranjang lokal, dan buka halaman produk dengan mudah." />
+  <meta name="theme-color" content="#ff5722" />
+
+  <style>
+    :root{
+      --brand:#ff5722;
+      --brand-dark:#e64a19;
+      --bg:#f5f5f5;
+      --card:#fff;
+      --muted:#666;
+      --text:#222;
+      --radius:10px;
+      --max-width:1100px;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter, Roboto, Arial, sans-serif;margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    header{background:var(--brand);color:#fff;padding:20px 16px;text-align:center}
+    header h1{margin:0;font-size:20px}
+    header p{margin:6px 0 0;font-size:13px;opacity:.95}
+    .wrap{max-width:var(--max-width);margin:24px auto;padding:0 16px}
+    .toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap}
+    .left-actions{display:flex;gap:8px;align-items:center}
+    .btn{background:var(--brand);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;border:0;cursor:pointer;font-size:14px}
+    .btn.secondary{background:#f2f2f2;color:var(--text)}
+    .search{padding:8px 10px;border-radius:8px;border:1px solid #ddd;background:#fff}
+    .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,0.06);overflow:hidden;display:flex;flex-direction:column;min-height:360px}
+    .media{height:190px;overflow:hidden;background:#eee}
+    .media img{width:100%;height:100%;object-fit:cover;display:block}
+    .card-body{padding:12px;display:flex;flex-direction:column;flex:1}
+    .card-body h3{margin:0 0 6px;font-size:16px}
+    .desc{color:var(--muted);font-size:13px;margin:0 0 10px;flex:1}
+    .price{font-weight:600;margin-bottom:8px}
+    .actions{display:flex;gap:8px;align-items:center}
+    .fav{background:transparent;border:1px solid #eee;padding:6px;border-radius:8px;cursor:pointer}
+    footer{margin:28px 0 0;padding:20px;text-align:center;color:#fff;background:#111}
+    .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:18px;background:rgba(0,0,0,0.85);color:#fff;padding:8px 12px;border-radius:8px;opacity:0;pointer-events:none;transition:all .22s;z-index:9999}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+    /* cart modal */
+    .cart-modal{position:fixed;right:20px;top:80px;width:340px;max-height:70vh;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15);overflow:auto;padding:12px;z-index:999}
+    .cart-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;align-items:center}
+    .cart-item img{width:56px;height:56px;object-fit:cover;border-radius:6px}
+    .small{font-size:13px;color:var(--muted)}
+    .qty{display:flex;gap:6px;align-items:center}
+    .qty button{padding:6px 8px;border-radius:6px;border:1px solid #ddd;background:#fafafa;cursor:pointer}
+    .empty{padding:16px;text-align:center;color:var(--muted)}
+    @media (max-width:640px){
+      .cart-modal{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:60vh}
+    }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <h1>Affiliate Shoppe</h1>
+    <p>Keranjang lokal — simpan favorit — buka halaman Shopee dengan cepat</p>
+  </header>
+
+  <main class="wrap" id="app">
+    <div class="toolbar" role="toolbar" aria-label="Toolbar">
+      <div class="left-actions">
+        <input id="q" class="search" placeholder="Cari produk..." aria-label="Cari produk" />
+        <button id="clearFilter" class="btn secondary" title="Reset filter">Reset</button>
+      </div>
+      <div>
+        <button id="toggleCart" class="btn" aria-expanded="false" aria-controls="cart-panel">Keranjang (<span id="cart-count">0</span>)</button>
+        <button id="openFavorites" class="btn secondary">Favorit</button>
+      </div>
+    </div>
+
+    <section id="products" class="products" aria-live="polite">
+      <!-- Produk akan di-render lewat JS -->
+    </section>
+  </main>
+
+  <div id="cart-panel" class="cart-modal" hidden aria-hidden="true" aria-label="Keranjang Belanja">
+    <strong>Keranjang Anda</strong>
+    <div id="cart-items"></div>
+    <div style="padding:10px 0;display:flex;justify-content:space-between;align-items:center">
+      <div class="small">Total:</div>
+      <div id="cart-total" style="font-weight:700">Rp 0</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button id="checkoutAll" class="btn" style="flex:1">Buka Semua Halaman Produk</button>
+      <button id="copyLinks" class="btn secondary" style="flex:1">Salin Link</button>
+    </div>
+    <div style="margin-top:8px">
+      <button id="exportCsv" class="btn secondary" style="width:100%">Ekspor CSV</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <footer>
+    <div style="max-width:var(--max-width);margin:0 auto;padding:12px 16px">
+      &copy; <span id="year"></span> Affiliate Shoppe — Disclaimer: beberapa link adalah link afiliasi.
+    </div>
+  </
